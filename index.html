@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YWC20 Candidates</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome เพื่อใช้ไอคอน -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <!-- Custom CSS -->
+  <style>
+    body {
+      background: linear-gradient(135deg, #1c2526 0%, #2c3e50 100%);
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+    }
+    .header {
+      background: linear-gradient(90deg, #ff4500, #ff8c00);
+      padding: 3rem;
+      text-align: center;
+      border-bottom: 5px solid #000;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    .header p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+    .input-section {
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .input-group input {
+      background-color: #2c3e50;
+      color: #fff;
+      border: 1px solid #ff4500;
+      border-radius: 25px 0 0 25px;
+    }
+    .input-group input::placeholder {
+      color: #ccc;
+    }
+    .input-group button {
+      background: linear-gradient(90deg, #ff4500, #ff8c00);
+      border: none;
+      border-radius: 0 25px 25px 0;
+      transition: all 0.3s ease;
+    }
+    .input-group button:hover {
+      background: linear-gradient(90deg, #e03e00, #e07b00);
+      transform: scale(1.05);
+    }
+    .card {
+      background-color: #2c3e50;
+      border: 2px solid #ff4500;
+      border-radius: 15px;
+      margin-bottom: 1.5rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+    }
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 20px rgba(255, 69, 0, 0.5);
+    }
+    .card-body {
+      color: #fff;
+    }
+    .card-title {
+      font-weight: bold;
+      color: #ff8c00;
+    }
+    .card-text {
+      color: #ddd;
+    }
+    .card-footer {
+      background: #1c2526;
+      border-top: 1px solid #ff4500;
+      text-align: center;
+      padding: 0.5rem;
+    }
+    .card-footer i {
+      color: #ff4500;
+      transition: color 0.3s ease;
+    }
+    .card-footer i:hover {
+      color: #ff8c00;
+    }
+    .register-btn {
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .register-btn a {
+      background: linear-gradient(90deg, #ff4500, #ff8c00);
+      border: none;
+      border-radius: 25px;
+      padding: 0.75rem 2rem;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+    }
+    .register-btn a:hover {
+      background: linear-gradient(90deg, #e03e00, #e07b00);
+      transform: scale(1.1);
+    }
+    .loading-spinner {
+      display: none;
+      text-align: center;
+      margin: 2rem 0;
+    }
+    .spinner-border {
+      color: #ff4500;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <h1>YWC20 Candidates</h1>
+    <p>Young Webmaster Camp ครั้งที่ 20</p>
+  </div>
+
+  <!-- ช่องกรอก x-reference-id -->
+  <div class="container">
+    <div class="input-section">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="input-group mb-3">
+            <input type="text" id="reference-id" class="form-control" placeholder="Enter  (e.g., PG01)" aria-label="x-reference-id">
+            <button class="btn btn-primary" onclick="fetchCandidates()"><i class="fas fa-search me-2"></i>Fetch Candidates</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="loading-spinner" id="loading-spinner">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Container สำหรับแสดงผลข้อมูล -->
+  <div class="container my-5">
+    <div class="row" id="candidates-container">
+      <!-- การ์ดจะถูกเพิ่มโดย JavaScript -->
+    </div>
+  </div>
+
+  <!-- ปุ่ม Register -->
+  <div class="register-btn">
+    <a href="https://register.ywc20.ywc.in.th" class="btn btn-primary"><i class="fas fa-user-plus me-2"></i>Register Now</a>
+  </div>
+
+  <!-- Bootstrap 5 JS และ Popper.js -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- JavaScript เพื่อดึงข้อมูลจาก API -->
+  <script>
+    function fetchCandidates() {
+      const referenceId = document.getElementById("reference-id").value.trim();
+      const container = document.getElementById("candidates-container");
+      const loadingSpinner = document.getElementById("loading-spinner");
+
+      // ล้างข้อมูลเก่าและแสดง Spinner
+      container.innerHTML = "";
+      loadingSpinner.style.display = "block";
+
+      // ตรวจสอบว่าผู้ใช้กรอก referenceId หรือไม่
+      if (!referenceId) {
+        container.innerHTML = `<div class="col-12"><p class="text-danger">Please enter an x-reference-id.</p></div>`;
+        loadingSpinner.style.display = "none";
+        return;
+      }
+
+      const url = "https://api.ywc20.ywc.in.th/homework/candidates";
+      const headers = {
+        "x-reference-id": referenceId,
+      };
+
+      fetch(url, {
+        method: "GET",
+        headers: headers,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          loadingSpinner.style.display = "none";
+          const category = referenceId.slice(0, 2); // ดึง prefix (เช่น DS, CT, PG, MK)
+          let candidates = [];
+
+          // เลือกข้อมูลตาม category
+          if (category === "DS") candidates = data.design || [];
+          else if (category === "CT") candidates = data.content || [];
+          else if (category === "PG") candidates = data.programming || [];
+          else if (category === "MK") candidates = data.marketing || [];
+          else {
+            candidates = [...(data.design || []), ...(data.content || []), ...(data.programming || []), ...(data.marketing || [])];
+          }
+
+          if (candidates.length === 0) {
+            container.innerHTML = `<div class="col-12"><p class="text-warning">No candidates found for this x-reference-id.</p></div>`;
+            return;
+          }
+
+          // กรองข้อมูลให้ตรงกับ interviewRefNo
+          const filteredCandidates = candidates.filter(candidate => candidate.interviewRefNo === referenceId);
+
+          if (filteredCandidates.length === 0) {
+            container.innerHTML = `<div class="col-12"><p class="text-warning">No candidates found with interviewRefNo: ${referenceId}</p></div>`;
+            return;
+          }
+
+          // แสดงข้อมูลในรูปแบบการ์ด
+          filteredCandidates.forEach((candidate) => {
+            const card = `
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">${candidate.firstName} ${candidate.lastName}</h5>
+                    <p class="card-text">Ref No: ${candidate.interviewRefNo}</p>
+                    <p class="card-text">Major: ${candidate.major.replace("web_", "Web ")}</p>
+                  </div>
+                  <div class="card-footer">
+                    <i class="fas fa-star"></i>
+                  </div>
+                </div>
+              </div>
+            `;
+            container.innerHTML += card;
+          });
+        })
+        .catch((error) => {
+          console.error("Error fetching API:", error);
+          loadingSpinner.style.display = "none";
+          container.innerHTML = `<div class="col-12"><p class="text-danger">Error loading candidates. Please try again later.</p></div>`;
+        });
+    }
+  </script>
+</body>
+</html>
